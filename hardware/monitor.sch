@@ -1,0 +1,159 @@
+EESchema Schematic File Version 4
+LIBS:cmon-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 1 5
+Title "Taransay Monitor"
+Date "2018-09-30"
+Rev "1"
+Comp "Sean Leavey"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Sheet
+S 5600 3100 700  1100
+U 5BACC4A2
+F0 "Sensors" 50
+F1 "sensors.sch" 50
+F2 "SDA" B L 5600 3200 50 
+F3 "SCL" I L 5600 3300 50 
+F4 "DS_POWER" I L 5600 4000 50 
+F5 "DS_SIGNAL" B L 5600 4100 50 
+F6 "PULSE_POWER" I L 5600 3500 50 
+F7 "PULSE_IRQ" O L 5600 3600 50 
+F8 "CT_SIGNAL" O L 5600 3800 50 
+$EndSheet
+$Sheet
+S 5600 2100 700  700 
+U 5BB1327A
+F0 "RF" 50
+F1 "rf.sch" 50
+F2 "SCK" I L 5600 2200 50 
+F3 "MISO" O L 5600 2300 50 
+F4 "MOSI" I L 5600 2400 50 
+F5 "RF_SS" I L 5600 2600 50 
+F6 "RF_IRQ" O L 5600 2700 50 
+$EndSheet
+$Comp
+L Mechanical:MountingHole H1
+U 1 1 5BB8321C
+P 7500 3100
+F 0 "H1" H 7600 3146 50  0000 L CNN
+F 1 "Mount 1" H 7600 3055 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3mm" H 7500 3100 50  0001 C CNN
+F 3 "~" H 7500 3100 50  0001 C CNN
+	1    7500 3100
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H2
+U 1 1 5BB83281
+P 7500 3300
+F 0 "H2" H 7600 3346 50  0000 L CNN
+F 1 "Mount 2" H 7600 3255 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3mm" H 7500 3300 50  0001 C CNN
+F 3 "~" H 7500 3300 50  0001 C CNN
+	1    7500 3300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H3
+U 1 1 5BB83295
+P 7500 3500
+F 0 "H3" H 7600 3546 50  0000 L CNN
+F 1 "Mount 3" H 7600 3455 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3mm" H 7500 3500 50  0001 C CNN
+F 3 "~" H 7500 3500 50  0001 C CNN
+	1    7500 3500
+	1    0    0    -1  
+$EndComp
+$Comp
+L Graphic:Logo_Open_Hardware_Small LOGO1
+U 1 1 5BB83574
+P 8400 3400
+F 0 "LOGO1" H 8400 3675 50  0001 C CNN
+F 1 "Logo" H 8400 3175 50  0001 C CNN
+F 2 "Symbol:OSHW-Logo2_7.3x6mm_SilkScreen" H 8400 3400 50  0001 C CNN
+F 3 "~" H 8400 3400 50  0001 C CNN
+	1    8400 3400
+	1    0    0    -1  
+$EndComp
+$Sheet
+S 2400 2100 600  300 
+U 5BAC9B4B
+F0 "Power" 50
+F1 "power.sch" 50
+F2 "BATT_MON" O R 3000 2200 50 
+$EndSheet
+$Sheet
+S 3700 2100 1200 2100
+U 5BAF2999
+F0 "Microcontroller" 50
+F1 "microcontroller.sch" 50
+F2 "MOSI" O R 4900 2400 50 
+F3 "MISO" I R 4900 2300 50 
+F4 "RF_SS" O R 4900 2600 50 
+F5 "SCK" O R 4900 2200 50 
+F6 "RF_IRQ" I R 4900 2700 50 
+F7 "SDA" B R 4900 3200 50 
+F8 "SCL" O R 4900 3300 50 
+F9 "PULSE_IRQ" I R 4900 3600 50 
+F10 "DS_SIGNAL" B R 4900 4100 50 
+F11 "CT_SIGNAL" I R 4900 3800 50 
+F12 "DS_POWER" O R 4900 4000 50 
+F13 "PULSE_POWER" O R 4900 3500 50 
+F14 "BATT_MON" I L 3700 2200 50 
+$EndSheet
+Wire Wire Line
+	5600 2700 4900 2700
+Wire Wire Line
+	4900 2600 5600 2600
+Wire Wire Line
+	5600 2400 4900 2400
+Wire Wire Line
+	4900 2300 5600 2300
+Wire Wire Line
+	5600 2200 4900 2200
+Wire Wire Line
+	3000 2200 3700 2200
+$Comp
+L Mechanical:MountingHole H5
+U 1 1 5BB27C07
+P 7500 3900
+F 0 "H5" H 7600 3946 50  0000 L CNN
+F 1 "Battery Mount 1" H 7600 3855 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 7500 3900 50  0001 C CNN
+F 3 "~" H 7500 3900 50  0001 C CNN
+	1    7500 3900
+	1    0    0    -1  
+$EndComp
+$Comp
+L Mechanical:MountingHole H6
+U 1 1 5BB28073
+P 7500 4100
+F 0 "H6" H 7600 4146 50  0000 L CNN
+F 1 "Battery Mount 2" H 7600 4055 50  0000 L CNN
+F 2 "MountingHole:MountingHole_3.2mm_M3" H 7500 4100 50  0001 C CNN
+F 3 "~" H 7500 4100 50  0001 C CNN
+	1    7500 4100
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5600 3200 4900 3200
+Wire Wire Line
+	4900 3300 5600 3300
+Wire Wire Line
+	5600 3500 4900 3500
+Wire Wire Line
+	4900 3600 5600 3600
+Wire Wire Line
+	5600 3800 4900 3800
+Wire Wire Line
+	5600 4000 4900 4000
+Wire Wire Line
+	4900 4100 5600 4100
+$EndSCHEMATC

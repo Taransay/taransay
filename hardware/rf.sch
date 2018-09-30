@@ -1,0 +1,192 @@
+EESchema Schematic File Version 4
+LIBS:cmon-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 3 5
+Title "Taransay Monitor"
+Date "2018-09-30"
+Rev "1"
+Comp "Sean Leavey"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L RF_AM_FM:RFM69CW U4
+U 1 1 5BB14156
+P 5700 3100
+F 0 "U4" H 5900 3700 50  0000 C CNN
+F 1 "RFM69CW" H 5900 3600 50  0000 C CNN
+F 2 "RF_Module:HOPERF_RFM69CW" H 5700 2500 50  0001 C CNN
+F 3 "http://www.hoperf.com/upload/rf/RFM69CW-V1.1.pdf" H 5700 2800 50  0001 C CNN
+	1    5700 3100
+	1    0    0    -1  
+$EndComp
+Text HLabel 4800 2800 0    50   Input ~ 0
+SCK
+Wire Wire Line
+	5200 2800 4800 2800
+Wire Wire Line
+	5200 2900 4800 2900
+Wire Wire Line
+	5200 3000 4800 3000
+Text HLabel 4800 2900 0    50   Output ~ 0
+MISO
+Text HLabel 4800 3000 0    50   Input ~ 0
+MOSI
+Wire Wire Line
+	5700 2400 5700 2600
+Wire Wire Line
+	5800 3600 5800 3500
+Wire Wire Line
+	5800 3600 4200 3600
+Text HLabel 4800 3100 0    50   Input ~ 0
+RF_SS
+Wire Wire Line
+	4800 3100 5000 3100
+$Comp
+L Device:R_Small R14
+U 1 1 5BB16E6E
+P 5000 2600
+F 0 "R14" H 5059 2646 50  0000 L CNN
+F 1 "100k" H 5059 2555 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 5000 2600 50  0001 C CNN
+F 3 "~" H 5000 2600 50  0001 C CNN
+	1    5000 2600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5000 2700 5000 3100
+Connection ~ 5000 3100
+Wire Wire Line
+	5000 3100 5200 3100
+Wire Wire Line
+	5000 2500 5000 2400
+Connection ~ 5000 2400
+Wire Wire Line
+	5000 2400 5700 2400
+Wire Wire Line
+	6200 2900 6400 2900
+Text HLabel 6400 2900 2    50   Output ~ 0
+RF_IRQ
+Text Notes 6800 3000 0    50   ~ 0
+D2
+$Comp
+L Connector:Conn_Coaxial J9
+U 1 1 5BB1786B
+P 7400 2800
+F 0 "J9" H 7500 2776 50  0000 L CNN
+F 1 "SMA antenna" H 7500 2685 50  0000 L CNN
+F 2 "Connector_Coaxial:SMA_Molex_73251-1153_EdgeMount_Horizontal" H 7400 2800 50  0001 C CNN
+F 3 " ~" H 7400 2800 50  0001 C CNN
+F 4 "Molex" H 7400 2800 50  0001 C CNN "Manufacturer1"
+F 5 "73251-1150" H 7400 2800 50  0001 C CNN "MPN1"
+F 6 "RS" H 7400 2800 50  0001 C CNN "Vendor1"
+F 7 "759-5299" H 7400 2800 50  0001 C CNN "SKU1"
+	1    7400 2800
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	5800 3600 7400 3600
+Wire Wire Line
+	7400 3600 7400 3000
+Connection ~ 5800 3600
+$Comp
+L Device:R_Small R16
+U 1 1 5BB17E91
+P 6900 2800
+F 0 "R16" V 6704 2800 50  0000 C CNN
+F 1 "0R" V 6795 2800 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 6900 2800 50  0001 C CNN
+F 3 "~" H 6900 2800 50  0001 C CNN
+	1    6900 2800
+	0    1    1    0   
+$EndComp
+$Comp
+L Device:R_Small R15
+U 1 1 5BB17F4B
+P 6900 2400
+F 0 "R15" V 6704 2400 50  0000 C CNN
+F 1 "0R" V 6795 2400 50  0000 C CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 6900 2400 50  0001 C CNN
+F 3 "~" H 6900 2400 50  0001 C CNN
+	1    6900 2400
+	0    1    1    0   
+$EndComp
+Wire Wire Line
+	7200 2800 7000 2800
+Wire Wire Line
+	6800 2800 6400 2800
+Wire Wire Line
+	6400 2800 6200 2800
+Wire Wire Line
+	6400 2800 6400 2400
+Wire Wire Line
+	6400 2400 6800 2400
+Connection ~ 6400 2800
+$Comp
+L Connector_Generic:Conn_01x01 J8
+U 1 1 5BB196DF
+P 7400 2400
+F 0 "J8" H 7480 2442 50  0000 L CNN
+F 1 "Whip antenna" H 7480 2351 50  0000 L CNN
+F 2 "Connector_Wire:SolderWirePad_1x01_Drill1mm" H 7400 2400 50  0001 C CNN
+F 3 "~" H 7400 2400 50  0001 C CNN
+	1    7400 2400
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	7200 2400 7000 2400
+$Comp
+L Device:CP_Small C12
+U 1 1 5BB7F77A
+P 4200 2900
+F 0 "C12" H 4288 2946 50  0000 L CNN
+F 1 "68u" H 4288 2855 50  0000 L CNN
+F 2 "Capacitor_THT:CP_Radial_D6.3mm_P2.50mm" H 4200 2900 50  0001 C CNN
+F 3 "~" H 4200 2900 50  0001 C CNN
+	1    4200 2900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 2800 4200 2400
+Wire Wire Line
+	4200 2400 5000 2400
+Wire Wire Line
+	4200 3000 4200 3600
+NoConn ~ 6200 3000
+NoConn ~ 6200 3100
+NoConn ~ 6200 3200
+NoConn ~ 6200 3300
+NoConn ~ 5200 3300
+$Comp
+L power:+3V3 #PWR08
+U 1 1 5BB01E76
+P 4200 2300
+F 0 "#PWR08" H 4200 2150 50  0001 C CNN
+F 1 "+3V3" H 4215 2473 50  0000 C CNN
+F 2 "" H 4200 2300 50  0001 C CNN
+F 3 "" H 4200 2300 50  0001 C CNN
+	1    4200 2300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	4200 2300 4200 2400
+Connection ~ 4200 2400
+Wire Wire Line
+	5800 3700 5800 3600
+$Comp
+L power:GND #PWR0111
+U 1 1 5BB12510
+P 5800 3700
+F 0 "#PWR0111" H 5800 3450 50  0001 C CNN
+F 1 "GND" H 5805 3527 50  0000 C CNN
+F 2 "" H 5800 3700 50  0001 C CNN
+F 3 "" H 5800 3700 50  0001 C CNN
+	1    5800 3700
+	1    0    0    -1  
+$EndComp
+$EndSCHEMATC

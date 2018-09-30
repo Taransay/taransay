@@ -1,0 +1,14 @@
+This declaration applies to the hardware design files within this directory and
+its subdirectories.
+
+(c) Copyright 2018, Sean Leavey
+
+This work is licensed under the Creative Commons 4.0 International Public License.
+https://creativecommons.org/licenses/by/4.0/legalcode
+
+Reference designs are provided "as is" with "all faults". The author disclaims all
+other warranties regarding this product including, but not limited to, any implied
+warranties of merchantability or fitness for a particular purpose. The author
+reserves the right to make changes to specifications and product descriptions, at
+any time, without notice. The author shall have no responsibilities whatsoever for
+conflicts or incompatabilities that arise from future changes.

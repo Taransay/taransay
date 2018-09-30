@@ -1,0 +1,263 @@
+EESchema Schematic File Version 4
+LIBS:cmon-cache
+EELAYER 26 0
+EELAYER END
+$Descr A4 11693 8268
+encoding utf-8
+Sheet 4 5
+Title "Taransay Monitor"
+Date "2018-09-30"
+Rev "1"
+Comp "Sean Leavey"
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+$Comp
+L Device:C_Small C1
+U 1 1 5BAC9DC4
+P 3000 1300
+F 0 "C1" H 3092 1346 50  0000 L CNN
+F 1 "1u" H 3092 1255 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 3000 1300 50  0001 C CNN
+F 3 "~" H 3000 1300 50  0001 C CNN
+F 4 "Kemet" H 3000 1300 50  0001 C CNN "Manufacturer1"
+F 5 "C0805C105K4RACTU" H 3000 1300 50  0001 C CNN "MPN1"
+F 6 "RS" H 3000 1300 50  0001 C CNN "Vendor1"
+F 7 "451-5770" H 3000 1300 50  0001 C CNN "SKU1"
+	1    3000 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:Battery BT1
+U 1 1 5BACA4BE
+P 2500 1300
+F 0 "BT1" H 2608 1346 50  0000 L CNN
+F 1 "Battery" H 2608 1255 50  0000 L CNN
+F 2 "TerminalBlock_Phoenix:TerminalBlock_Phoenix_MKDS-3-2-5.08_1x02_P5.08mm_Horizontal" V 2500 1360 50  0001 C CNN
+F 3 "~" V 2500 1360 50  0001 C CNN
+F 4 "Keystone" H 2500 1300 50  0001 C CNN "Manufacturer1"
+F 5 "2463" H 2500 1300 50  0001 C CNN "MPN1"
+F 6 "RS" H 2500 1300 50  0001 C CNN "Vendor1"
+F 7 "481-4055WRONG" H 2500 1300 50  0001 C CNN "SKU1"
+	1    2500 1300
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+BATT #PWR0101
+U 1 1 5BACAB7A
+P 2500 800
+F 0 "#PWR0101" H 2500 650 50  0001 C CNN
+F 1 "+BATT" H 2515 973 50  0000 C CNN
+F 2 "" H 2500 800 50  0001 C CNN
+F 3 "" H 2500 800 50  0001 C CNN
+	1    2500 800 
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:+BATT #PWR0103
+U 1 1 5BACB6AD
+P 2500 3000
+F 0 "#PWR0103" H 2500 2850 50  0001 C CNN
+F 1 "+BATT" H 2515 3173 50  0000 C CNN
+F 2 "" H 2500 3000 50  0001 C CNN
+F 3 "" H 2500 3000 50  0001 C CNN
+	1    2500 3000
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R1
+U 1 1 5BACB7E5
+P 2500 3200
+F 0 "R1" H 2559 3246 50  0000 L CNN
+F 1 "470k" H 2559 3155 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 2500 3200 50  0001 C CNN
+F 3 "~" H 2500 3200 50  0001 C CNN
+	1    2500 3200
+	1    0    0    -1  
+$EndComp
+$Comp
+L Device:R_Small R2
+U 1 1 5BACB864
+P 2500 3600
+F 0 "R2" H 2559 3646 50  0000 L CNN
+F 1 "470k" H 2559 3555 50  0000 L CNN
+F 2 "Resistor_SMD:R_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 2500 3600 50  0001 C CNN
+F 3 "~" H 2500 3600 50  0001 C CNN
+	1    2500 3600
+	1    0    0    -1  
+$EndComp
+$Comp
+L power:GND #PWR0104
+U 1 1 5BACB8A8
+P 2500 3900
+F 0 "#PWR0104" H 2500 3650 50  0001 C CNN
+F 1 "GND" H 2505 3727 50  0000 C CNN
+F 2 "" H 2500 3900 50  0001 C CNN
+F 3 "" H 2500 3900 50  0001 C CNN
+	1    2500 3900
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 3900 2500 3800
+Wire Wire Line
+	2500 3500 2500 3400
+Wire Wire Line
+	2500 3100 2500 3000
+Wire Wire Line
+	2500 3400 2900 3400
+Connection ~ 2500 3400
+Wire Wire Line
+	2500 3400 2500 3300
+Text HLabel 3100 3400 2    50   Output ~ 0
+BATT_MON
+$Comp
+L Regulator_Switching:LTC3525-3.3 U1
+U 1 1 5BB188B3
+P 3900 1300
+F 0 "U1" H 3800 900 50  0000 C CNN
+F 1 "LTC3525-3.3" H 3600 1000 50  0000 C CNN
+F 2 "Package_TO_SOT_SMD:SOT-363_SC-70-6" H 3950 1050 50  0001 L CNN
+F 3 "http://cds.linear.com/docs/en/datasheet/3525fc.pdf" H 3900 1300 50  0001 C CNN
+F 4 "Linear Technology" H 3900 1300 50  0001 C CNN "Manufacturer1"
+F 5 "LTC3525ESC6-3.3#TRMPBF" H 3900 1300 50  0001 C CNN "MPN1"
+F 6 "RS" H 3900 1300 50  0001 C CNN "Vendor1"
+F 7 "822-6828" H 3900 1300 50  0001 C CNN "SKU1"
+	1    3900 1300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 900  2500 1100
+Connection ~ 2500 900 
+Wire Wire Line
+	2500 1500 2500 1800
+Connection ~ 2500 1800
+Wire Wire Line
+	2500 1800 2500 1900
+Wire Wire Line
+	4300 1400 4800 1400
+Wire Wire Line
+	4800 1800 4800 1700
+Wire Wire Line
+	3500 1300 3400 1300
+Wire Wire Line
+	3400 1300 3400 900 
+Wire Wire Line
+	3400 900  3900 900 
+Wire Wire Line
+	3900 900  3900 1000
+Wire Wire Line
+	3400 900  3000 900 
+Connection ~ 3400 900 
+Wire Wire Line
+	4800 1800 3900 1800
+Wire Wire Line
+	3900 1600 3900 1800
+Connection ~ 3900 1800
+Wire Wire Line
+	3900 1800 3000 1800
+Wire Wire Line
+	4300 1200 4500 1200
+Wire Wire Line
+	4500 1200 4500 900 
+Connection ~ 3900 900 
+$Comp
+L Device:L_Small L1
+U 1 1 5BB266FC
+P 4200 900
+F 0 "L1" V 4385 900 50  0000 C CNN
+F 1 "10u" V 4294 900 50  0000 C CNN
+F 2 "Inductor_SMD:L_1210_3225Metric_Pad1.42x2.65mm_HandSolder" H 4200 900 50  0001 C CNN
+F 3 "~" H 4200 900 50  0001 C CNN
+F 4 "Murata" V 4200 900 50  0001 C CNN "Manufacturer1"
+F 5 "LQH32CN100K53L" V 4200 900 50  0001 C CNN "MPN1"
+F 6 "RS" V 4200 900 50  0001 C CNN "Vendor1"
+F 7 "725-5042" V 4200 900 50  0001 C CNN "SKU1"
+	1    4200 900 
+	0    -1   -1   0   
+$EndComp
+Wire Wire Line
+	3900 900  4100 900 
+Wire Wire Line
+	4300 900  4500 900 
+Wire Wire Line
+	3000 1200 3000 900 
+Connection ~ 3000 900 
+Wire Wire Line
+	3000 1400 3000 1800
+Connection ~ 3000 1800
+$Comp
+L Device:C_Small C2
+U 1 1 5BB2B13B
+P 4800 1600
+F 0 "C2" H 4892 1646 50  0000 L CNN
+F 1 "22u" H 4892 1555 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 4800 1600 50  0001 C CNN
+F 3 "~" H 4800 1600 50  0001 C CNN
+F 4 "Kemet" H 4800 1600 50  0001 C CNN "Manufacturer1"
+F 5 "C0805C220J5GACTU" H 4800 1600 50  0001 C CNN "MPN1"
+F 6 "RS" H 4800 1600 50  0001 C CNN "Vendor1"
+F 7 "264-4258" H 4800 1600 50  0001 C CNN "SKU1"
+	1    4800 1600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 900  3000 900 
+Wire Wire Line
+	2500 1800 3000 1800
+$Comp
+L Device:C_Small C3
+U 1 1 5BB2D226
+P 2900 3600
+F 0 "C3" H 2992 3646 50  0000 L CNN
+F 1 "NP" H 2992 3555 50  0000 L CNN
+F 2 "Capacitor_SMD:C_0805_2012Metric_Pad1.15x1.40mm_HandSolder" H 2900 3600 50  0001 C CNN
+F 3 "~" H 2900 3600 50  0001 C CNN
+	1    2900 3600
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2900 3500 2900 3400
+Connection ~ 2900 3400
+Wire Wire Line
+	2900 3400 3100 3400
+Wire Wire Line
+	2900 3700 2900 3800
+Wire Wire Line
+	2500 3800 2900 3800
+Connection ~ 2500 3800
+Wire Wire Line
+	2500 3800 2500 3700
+Text Notes 3000 3800 0    50   ~ 0
+https://jeelabs.org/2013/05/16/measuring-the-battery-without-draining-it/
+$Comp
+L power:+3V3 #PWR0105
+U 1 1 5BAF783B
+P 4800 1300
+F 0 "#PWR0105" H 4800 1150 50  0001 C CNN
+F 1 "+3V3" H 4815 1473 50  0000 C CNN
+F 2 "" H 4800 1300 50  0001 C CNN
+F 3 "" H 4800 1300 50  0001 C CNN
+	1    4800 1300
+	1    0    0    -1  
+$EndComp
+Wire Wire Line
+	2500 800  2500 900 
+$Comp
+L power:GND #PWR0102
+U 1 1 5BACABD5
+P 2500 1900
+F 0 "#PWR0102" H 2500 1650 50  0001 C CNN
+F 1 "GND" H 2505 1727 50  0000 C CNN
+F 2 "" H 2500 1900 50  0001 C CNN
+F 3 "" H 2500 1900 50  0001 C CNN
+	1    2500 1900
+	1    0    0    -1  
+$EndComp
+Connection ~ 4800 1400
+Wire Wire Line
+	4800 1400 4800 1500
+Wire Wire Line
+	4800 1400 4800 1300
+$EndSCHEMATC

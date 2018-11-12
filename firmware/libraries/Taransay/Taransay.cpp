@@ -116,8 +116,11 @@ void ds18b20_init() {
   if (ds18b20_count > 0) {
     ds18b20_enabled = true;
     
-    // get address
+    // Get address.
     one_wire.search(ds18b20_address);
+  } else {
+    // Set default value.
+    ds18b20_temperature = DS18B20_DEFAULT * 10.0;
   }
   
   ds18b20_off();
@@ -144,13 +147,13 @@ void ds18b20_read() {
   
   // Check if reading is within range.
   if ((temperature > 125.0) || (temperature < -55.0)) {
-    // Out of range; set to minimum.
-    ds18b20_temperature = -55;
-  } else {
-    // Convert to integer representing tenths of a degree.
-    // (float -> int conversion)
-    ds18b20_temperature = temperature * 10.0;
+    // Out of range; set to default.
+    temperature = DS18B20_DEFAULT;
   }
+  
+  // Convert to integer representing tenths of a degree.
+  // (float -> int conversion)
+  ds18b20_temperature = temperature * 10.0;
 }
 
 void ds18b20_on() {

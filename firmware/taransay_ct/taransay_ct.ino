@@ -94,9 +94,10 @@ void loop()
   // Get external temperature reading.
   if (ds18b20_enabled) {
     ds18b20_read();
-    // Copy temperature into payload.
-    taransay_ct.ext_temperature = ds18b20_temperature;
   }
+  
+  // Copy temperature into payload.
+  taransay_ct.ext_temperature = ds18b20_temperature;
 
   // Enable SPI bus for RF module.
   power_spi_enable();

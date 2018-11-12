@@ -42,6 +42,9 @@
   #define DS18B20_PRECISION   12
 #endif
 
+// Default temperature reading for when reading is out of range of sensor is not present.
+#define DS18B20_DEFAULT       -55
+
 // Delay required to take temperature measurement (see above).
 #ifndef ASYNC_DELAY
   #define ASYNC_DELAY         750

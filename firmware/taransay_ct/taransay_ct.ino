@@ -4,8 +4,8 @@
 // Watchdog timeout (ms).
 #define WDT_PERIOD            80
 // Data sent after WDT_MAX_NUMBER periods of WDT_PERIOD ms without pulses:
-// 690 x 80 ms = 55.2 s (it needs to be about 5 s less than the record interval in emoncms).
-#define WDT_MAX_NUMBER        690
+// 115 x 80 ms = 9.2 s (~10 s once sent to emoncms).
+#define WDT_MAX_NUMBER        115
 
 // Set DS18B20 temperature precision. The higher the precision, the longer, and therefore
 // more battery power, the conversion takes.
@@ -21,6 +21,7 @@
 #include <avr/power.h>
 #include <avr/pgmspace.h>
 #include <Taransay.h>
+#include <EmonLib.h>
 
 // Attach JeeLib sleep function to Atmega328 watchdog.
 // This enables the microcontroller to be put into sleep mode in between readings to reduce power consumption.
@@ -29,6 +30,7 @@ ISR(WDT_vect) { Sleepy::watchdogEvent(); }
 // Packet structure.
 typedef struct {
   int supply_voltage;               // x10
+  int power;
   int temperature;                  // x10
   int humidity;                     // x10
   int ext_temperature;              // x10
@@ -71,6 +73,16 @@ void loop()
   
   // Get supply voltage (x10).
   taransay_ct.supply_voltage = int(analogRead(SUPPLY_MONITOR_PIN) * 0.0644);
+
+  // Read power.
+  if (ct_enabled) {
+    ct_read();
+  } else {
+    // Set power to zero.
+    ct_power = 0;
+  }
+  
+  taransay_ct.power = ct_power;
 
   // Read from SI7021 temperature and humidity sensor.
   if (si7021_enabled) {

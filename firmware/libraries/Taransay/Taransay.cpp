@@ -2,8 +2,12 @@
 #include <avr/pgmspace.h>
 #include <avr/power.h>
 
+bool ct_enabled;
 bool ds18b20_enabled;
 bool si7021_enabled;
+
+EnergyMonitor ct;
+int ct_power;
 
 byte ds18b20_address[8];  // 8 bytes per address
 unsigned int ds18b20_count;
@@ -26,7 +30,10 @@ void hardware_init(unsigned int node_id, unsigned int network_group) {
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
 
-  // Set up sensor power.
+  // Set up current transducer.
+  pinMode(CURRENT_TRANSDUCER_PIN, INPUT);
+  
+  // Set up DS18B20 sensor power.
   pinMode(ONE_WIRE_POWER, OUTPUT);
   digitalWrite(ONE_WIRE_POWER, LOW);
 
@@ -35,6 +42,9 @@ void hardware_init(unsigned int node_id, unsigned int network_group) {
   
   // Set up serial.
   Serial.begin(BAUD_RATE);
+  
+  // Detect current transducer.
+  ct_init();
 
   // Detect DS18B20 sensor(s).
   ds18b20_init();
@@ -78,6 +88,18 @@ void led_flash(unsigned int count, unsigned int duration) {
     delay(duration);
     digitalWrite(LED_PIN, LOW);
   }
+}
+
+void ct_init() {
+  // Check for voltage on the input (should be roughly half the supply).
+  ct_enabled = (analogRead(CURRENT_TRANSDUCER_PIN) > 0);
+  
+  // Set calibration.
+  ct.current(CURRENT_TRANSDUCER_PIN, CURRENT_CALIBRATION);
+}
+
+void ct_read() {
+  ct_power = ct.calcIrms(VOLTAGE_SAMPLES) * VOLTAGE_RMS;
 }
 
 void ds18b20_init() {
@@ -179,6 +201,14 @@ void si7021_read() {
 }
 
 void serial_print_startup(unsigned int node_id, unsigned int network_group) {
+  Serial.print(F("Current transducer "));
+  
+  if (ct_enabled) {
+    Serial.println(F("enabled"));
+  } else {
+    Serial.println(F("disabled"));
+  }
+  
   Serial.print(F("Detected "));
   Serial.print(ds18b20_count);
   Serial.println(F(" DS18B20 sensors (only first used)"));

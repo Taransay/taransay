@@ -30,7 +30,7 @@ ISR(WDT_vect) { Sleepy::watchdogEvent(); }
 // Packet structure.
 typedef struct {
   int supply_voltage;               // x10
-  int power;
+  int power;                        // x1
   int temperature;                  // x10
   int humidity;                     // x10
   int ext_temperature;              // x10

@@ -112,12 +112,15 @@ void ds18b20_init() {
   sensors.setWaitForConversion(false);
   
   ds18b20_count = sensors.getDeviceCount();
-
-  ds18b20_off();
   
   if (ds18b20_count > 0) {
     ds18b20_enabled = true;
+    
+    // get address
+    one_wire.search(ds18b20_address);
   }
+  
+  ds18b20_off();
 }
 
 void ds18b20_read() {
@@ -134,18 +137,19 @@ void ds18b20_read() {
   dodelay(ASYNC_DELAY);
 
   // Get temperature.
-  ds18b20_temperature = sensors.getTempC(ds18b20_address);
+  float temperature = sensors.getTempC(ds18b20_address);
 
   // Power off the sensor.
   ds18b20_off();
   
   // Check if reading is within range.
-  if ((ds18b20_temperature > 125.0) || (ds18b20_temperature < -55.0)) {
+  if ((temperature > 125.0) || (temperature < -55.0)) {
     // Out of range; set to minimum.
     ds18b20_temperature = -55;
   } else {
     // Convert to integer representing tenths of a degree.
-    ds18b20_temperature *= 10;
+    // (float -> int conversion)
+    ds18b20_temperature = temperature * 10.0;
   }
 }
 
@@ -212,6 +216,12 @@ void serial_print_startup(unsigned int node_id, unsigned int network_group) {
   Serial.print(F("Detected "));
   Serial.print(ds18b20_count);
   Serial.println(F(" DS18B20 sensors (only first used)"));
+  Serial.print("Address:");
+  for (int i; i < 8; i++) {
+    Serial.print(" ");
+    Serial.print(ds18b20_address[i], HEX);
+  }
+  Serial.println();
 
   if (si7021_enabled) {
     Serial.print(F("SI7021 found with ID: "));

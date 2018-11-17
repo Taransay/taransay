@@ -84,7 +84,13 @@ void loop()
     led_flash(1, 50);
 
     // Get supply voltage (x1000).
-    taransay_base.supply_voltage = int(analogRead(SUPPLY_MONITOR_PIN) * 3.222);
+    if (battery_enabled) {
+      battery_read();
+    } else {
+      battery_voltage = 0;
+    }
+  
+    taransay_base.supply_voltage = battery_voltage;
 
     // Read from SI7021 temperature and humidity sensor.
     if (si7021_enabled) {

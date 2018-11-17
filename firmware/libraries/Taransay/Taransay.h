@@ -21,6 +21,11 @@
   #define BAUD_RATE           38400
 #endif
 
+// Battery calibration.
+#ifndef BATTERY_CALIBRATION
+  #define BATTERY_CALIBRATION 2.0
+#endif
+
 // Voltage used for apparent power measurement.
 #ifndef VOLTAGE_RMS
   #define VOLTAGE_RMS         230
@@ -59,6 +64,7 @@
 #include <EmonLib.h>
 
 // Detected hardware flags.
+extern bool battery_enabled;
 extern bool ct_enabled;
 extern bool ds18b20_enabled;
 extern bool si7021_enabled;
@@ -66,6 +72,8 @@ extern bool si7021_enabled;
 // Current transducer.
 extern EnergyMonitor ct;
 extern int ct_power;
+
+extern int battery_voltage;
 
 // Setup DS18B20 temperature sensor.
 extern OneWire one_wire;
@@ -81,6 +89,8 @@ extern int si7021_temperature, si7021_humidity;
 void hardware_init(unsigned int, unsigned int);
 void hardware_disable(void);
 void led_flash(unsigned int, unsigned int);
+void battery_init(void);
+void battery_read(void);
 void ct_init(void);
 void ct_read(void);
 void ds18b20_init(void);

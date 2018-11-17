@@ -2,12 +2,15 @@
 #include <avr/pgmspace.h>
 #include <avr/power.h>
 
+bool battery_enabled;
 bool ct_enabled;
 bool ds18b20_enabled;
 bool si7021_enabled;
 
 EnergyMonitor ct;
 int ct_power;
+
+int battery_voltage;
 
 byte ds18b20_address[8];  // 8 bytes per address
 unsigned int ds18b20_count;
@@ -29,19 +32,12 @@ void hardware_init(unsigned int node_id, unsigned int network_group) {
   // Set up LED pin and switch on.
   pinMode(LED_PIN, OUTPUT);
   digitalWrite(LED_PIN, HIGH);
-
-  // Set up current transducer.
-  pinMode(CURRENT_TRANSDUCER_PIN, INPUT);
-  
-  // Set up DS18B20 sensor power.
-  pinMode(ONE_WIRE_POWER, OUTPUT);
-  digitalWrite(ONE_WIRE_POWER, LOW);
-
-  // Set up battery monitor.
-  pinMode(SUPPLY_MONITOR_PIN, INPUT);
   
   // Set up serial.
   Serial.begin(BAUD_RATE);
+  
+  // Set up battery monitor.
+  battery_init();
   
   // Detect current transducer.
   ct_init();
@@ -90,9 +86,29 @@ void led_flash(unsigned int count, unsigned int duration) {
   }
 }
 
+void battery_init() {
+  pinMode(SUPPLY_MONITOR_PIN, INPUT);
+  
+  // Use the analog supply rail as the reference.
+  analogReference(DEFAULT);
+  
+  // Make a throwaway measurement.
+  analogRead(SUPPLY_MONITOR_PIN);
+  
+  // Check for volage on the battery monitor.
+  battery_enabled = analogRead(SUPPLY_MONITOR_PIN) > 0;
+}
+
+void battery_read() {
+  battery_voltage = BATTERY_CALIBRATION * map(analogRead(SUPPLY_MONITOR_PIN), 0, 1023, 0, 3300);
+}
+
 void ct_init() {
+  // Set up current transducer.
+  pinMode(CURRENT_TRANSDUCER_PIN, INPUT);
+  
   // Check for voltage on the input (should be roughly half the supply).
-  ct_enabled = (analogRead(CURRENT_TRANSDUCER_PIN) > 0);
+  ct_enabled = analogRead(CURRENT_TRANSDUCER_PIN) > 0;
   
   // Set calibration.
   ct.current(CURRENT_TRANSDUCER_PIN, CURRENT_CALIBRATION);
@@ -103,6 +119,10 @@ void ct_read() {
 }
 
 void ds18b20_init() {
+  // Set up DS18B20 sensor power.
+  pinMode(ONE_WIRE_POWER, OUTPUT);
+  digitalWrite(ONE_WIRE_POWER, LOW);
+  
   ds18b20_on();
   
   sensors.begin();
@@ -208,6 +228,15 @@ void si7021_read() {
 }
 
 void serial_print_startup(unsigned int node_id, unsigned int network_group) {
+  if (battery_enabled) {
+    Serial.println(F("Running on battery"));
+    battery_read();
+    Serial.print(F("Battery: "));
+    Serial.println(battery_voltage);
+  } else {
+    Serial.println(F("Running on external supply"));
+  }
+  
   Serial.print(F("Current transducer "));
   
   if (ct_enabled) {

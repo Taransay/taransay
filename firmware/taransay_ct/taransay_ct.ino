@@ -29,7 +29,7 @@ ISR(WDT_vect) { Sleepy::watchdogEvent(); }
 
 // Packet structure.
 typedef struct {
-  int supply_voltage;               // x10
+  int supply_voltage;               // x1000
   int power;                        // x1
   int temperature;                  // x10
   int humidity;                     // x10
@@ -71,8 +71,14 @@ void loop()
     return;
   }
   
-  // Get supply voltage (x10).
-  taransay_ct.supply_voltage = int(analogRead(SUPPLY_MONITOR_PIN) * 0.0644);
+  // Get supply voltage (x1000).
+  if (battery_enabled) {
+    battery_read();
+  } else {
+    battery_voltage = 0;
+  }
+  
+  taransay_ct.supply_voltage = battery_voltage;
 
   // Read power.
   if (ct_enabled) {

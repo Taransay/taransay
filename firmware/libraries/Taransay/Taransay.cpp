@@ -7,8 +7,7 @@ bool ct_enabled;
 bool ds18b20_enabled;
 bool si7021_enabled;
 
-CT_Sensor ct0(CURRENT_TRANSDUCER_PIN, CURRENT_TRANSDUCER_RATIO, CURRENT_TRANSDUCER_BURDEN);
-CT_Control ct(CT_FREQ_50HZ);
+EnergyMonitor ct;
 int ct_power;
 
 int battery_voltage;
@@ -76,7 +75,7 @@ void hardware_disable() {
   // Disable I2C bus power.
   power_twi_disable();
   // Disable second timer.
-  //power_timer1_disable();
+  power_timer1_disable();
 }
 
 void led_flash(unsigned int count, unsigned int duration) {
@@ -111,17 +110,12 @@ void ct_init() {
   // Check for voltage on the input (should be roughly half the supply).
   ct_enabled = analogRead(CURRENT_TRANSDUCER_PIN) > 0;
   
-  // Start controller.
-  ct.begin();
+  // Set calibration.
+  ct.current(CURRENT_TRANSDUCER_PIN, CURRENT_CALIBRATION);
 }
 
 void ct_read() {
-  ct.read(&ct0);
-  Serial.println("Amps: ");
-  Serial.println(ct0.amps());
-  ct_power = round(ct0.amps() * VOLTAGE_RMS);
-  Serial.println("Power: ");
-  Serial.println(ct_power);
+  ct_power = ct.calcIrms(VOLTAGE_SAMPLES) * VOLTAGE_RMS;
 }
 
 void ds18b20_init() {

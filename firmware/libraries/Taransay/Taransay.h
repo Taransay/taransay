@@ -26,19 +26,19 @@
   #define BATTERY_CALIBRATION 2.0
 #endif
 
-// Current transducer ratio.
-#ifndef CURRENT_TRANSDUCER_RATIO
-  #define CURRENT_TRANSDUCER_RATIO 2000
-#endif
-
-// Current transducer burden resistance.
-#ifndef CURRENT_TRANSDUCER_BURDEN
-  #define CURRENT_TRANSDUCER_BURDEN 22
-#endif
-
 // Voltage used for apparent power measurement.
 #ifndef VOLTAGE_RMS
-  #define VOLTAGE_RMS         230.0
+  #define VOLTAGE_RMS         230
+#endif
+
+// Number of samples to make.
+#ifndef VOLTAGE_SAMPLES
+  #define VOLTAGE_SAMPLES     1662
+#endif
+
+// Current calibration: (2000 turns / 22 ohm burden resistance).
+#ifndef CURRENT_CALIBRATION
+  #define CURRENT_CALIBRATION 90.9
 #endif
 
 // DS18B20 temperature precision: 9 (93.8ms), 10 (187.5ms), 11 (375ms) or 12 (750ms) bits
@@ -61,7 +61,7 @@
 #include <DallasTemperature.h> // DS18B20 temperature sensor library.
 #include <Wire.h> // I2C protocol library.
 #include <SI7021.h> // Si7021 temperature and humidity sensor library.
-#include <CurrentTransformer.h>
+#include <EmonLib.h>
 
 // Detected hardware flags.
 extern bool battery_enabled;
@@ -70,8 +70,7 @@ extern bool ds18b20_enabled;
 extern bool si7021_enabled;
 
 // Current transducer.
-extern CT_Sensor ct0;
-extern CT_Control ct;
+extern EnergyMonitor ct;
 extern int ct_power;
 
 extern int battery_voltage;

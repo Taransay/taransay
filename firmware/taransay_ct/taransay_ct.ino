@@ -1,11 +1,11 @@
 // Firmware version.
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.0.1"
 
 // Watchdog timeout (ms).
 #define WDT_PERIOD            80
 // Data sent after WDT_MAX_NUMBER periods of WDT_PERIOD ms without pulses:
-// 115 x 80 ms = 9.2 s (~10 s once sent to emoncms).
-#define WDT_MAX_NUMBER        115
+// 60 x 80 ms = 4.8 s (~5 s once processed by emoncms).
+#define WDT_MAX_NUMBER        60
 
 // Set DS18B20 temperature precision. The higher the precision, the longer, and therefore
 // more battery power, the conversion takes.

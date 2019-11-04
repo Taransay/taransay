@@ -40,3 +40,5 @@ Programming with ISP
 --------------------
 
 6-pin ISP header should be oriented with notch facing towards edge of board.
+
+5-pin UART header colours, starting from edge of board: red, white, grey, BLANK, black

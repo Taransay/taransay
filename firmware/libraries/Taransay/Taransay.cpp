@@ -229,15 +229,15 @@ void si7021_read() {
 
 void serial_print_startup(unsigned int node_id, unsigned int network_group) {
   if (battery_enabled) {
-    Serial.println(F("Running on battery"));
+    Serial.println(F("; Running on battery"));
     battery_read();
-    Serial.print(F("Battery: "));
+    Serial.print(F("; Battery: "));
     Serial.println(battery_voltage);
   } else {
-    Serial.println(F("Running on external supply"));
+    Serial.println(F("; Running on external supply"));
   }
   
-  Serial.print(F("Current transducer "));
+  Serial.print(F("; Current transducer "));
   
   if (ct_enabled) {
     Serial.println(F("enabled"));
@@ -245,10 +245,10 @@ void serial_print_startup(unsigned int node_id, unsigned int network_group) {
     Serial.println(F("disabled"));
   }
   
-  Serial.print(F("Detected "));
+  Serial.print(F("; Detected "));
   Serial.print(ds18b20_count);
   Serial.println(F(" DS18B20 sensors (only first used)"));
-  Serial.print("Address:");
+  Serial.print("; Address:");
   for (int i; i < 8; i++) {
     Serial.print(" ");
     Serial.print(ds18b20_address[i], HEX);
@@ -256,34 +256,34 @@ void serial_print_startup(unsigned int node_id, unsigned int network_group) {
   Serial.println();
 
   if (si7021_enabled) {
-    Serial.print(F("SI7021 found with ID: "));
+    Serial.print(F("; SI7021 found with ID: "));
     Serial.println(si7021_device_id);
     
     // Get first reading.
     si7021_read();
-    Serial.print(F("SI7021 t: "));
+    Serial.print(F("; SI7021 t: "));
     Serial.println(si7021_temperature / 100.0);
-    Serial.print(F("SI7021 h: "));
+    Serial.print(F("; SI7021 h: "));
     Serial.println(si7021_humidity / 100.0);
   } else {
-    Serial.print(F("Invalid SI7021 device ID: "));
+    Serial.print(F("; Invalid SI7021 device ID: "));
     Serial.println(si7021_device_id);
   }
 
   delay(2000);
 
   #if (RF69_COMPAT)
-    Serial.println(F("RFM69CW enabled: "));
+    Serial.println(F("; RFM69CW enabled: "));
   #else
-    Serial.println(F("RFM12B enabled: "));
+    Serial.println(F("; RFM12B enabled: "));
   #endif
 
-  Serial.print(F("  Node: "));
+  Serial.print(F(";  Node: "));
   Serial.println(node_id);
   
-  Serial.println(F("  Frequency: 433 MHz"));
+  Serial.println(F(";  Frequency: 433 MHz"));
   
-  Serial.print(F("  Network: "));
+  Serial.print(F(";  Network: "));
   Serial.println(network_group);
   
   delay(20);

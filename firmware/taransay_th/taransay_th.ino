@@ -1,5 +1,5 @@
 // Firmware version.
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.1.0"
 
 // Watchdog timeout (ms).
 #define WDT_PERIOD            80
@@ -45,9 +45,9 @@ void setup() {
 
   hardware_init(NETWORK_NODE_ID, NETWORK_GROUP);
   
-  Serial.print(F("Taransay TH v")); Serial.println(FIRMWARE_VERSION);
-  Serial.println(F("Sean Leavey <electronics@attackllama.com>"));
-  Serial.println(F("Starting..."));
+  Serial.print(F("; Taransay TH v")); Serial.println(FIRMWARE_VERSION);
+  Serial.println(F("; Sean Leavey <electronics@attackllama.com>"));
+  Serial.println(F("; Starting..."));
 
   delay(2000);
   serial_print_startup(NETWORK_NODE_ID, NETWORK_GROUP);

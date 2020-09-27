@@ -1,5 +1,5 @@
 // Firmware version.
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.1.0"
 
 // Time between readings (ms).
 #define SAMPLE_RATE           30000
@@ -40,9 +40,9 @@ void setup() {
 
   hardware_init(NETWORK_NODE_ID, NETWORK_GROUP);
   
-  Serial.print(F("Taransay Base v")); Serial.println(FIRMWARE_VERSION);
-  Serial.println(F("Sean Leavey <electronics@attackllama.com>"));
-  Serial.println(F("Starting..."));
+  Serial.print(F("; Taransay Base v")); Serial.println(FIRMWARE_VERSION);
+  Serial.println(F("; Sean Leavey <electronics@attackllama.com>"));
+  Serial.println(F("; Starting..."));
 
   delay(2000);
   serial_print_startup(NETWORK_NODE_ID, NETWORK_GROUP);
@@ -73,7 +73,7 @@ void loop()
 
   // Check if it's time to reset the RF module.
   if ((now - last_rf_reset) > RF_RESET_PERIOD) {
-    Serial.println(F("Resetting RF"));
+    Serial.println(F("; Resetting RF"));
     rf_setup(NETWORK_NODE_ID, NETWORK_GROUP);
     last_rf_reset = now;
   }

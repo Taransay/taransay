@@ -1,0 +1,9 @@
+EESchema-DOCLIB  Version 2.0
+#
+$CMP RFM69CW
+D ISM Radio Transciever Module, SPI interface
+K Radio, ISM, Transciever, Module, AES
+F http://www.hoperf.com/upload/rf/RFM69CW-V1.1.pdf
+$ENDCMP
+#
+#End Doc Library

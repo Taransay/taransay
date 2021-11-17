@@ -4,5 +4,6 @@ r1 - 2018-09-29
 r1 - 2020-08-13
  - Swapped orientation of current transducer socket
  - Moved 5-pin header further from edge so it doesn't touch the Raspberry Pi GPIO header on the underside
+   (previously GND of the 5-pin header contacted pin GPIO 27 on the Pi header)
  - Changed silkscreen "Assembler" / "Date" areas to single "Assembled" area
  - Tweaked ground plane

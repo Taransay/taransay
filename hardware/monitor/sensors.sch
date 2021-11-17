@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:cmon-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -49,7 +48,7 @@ F 3 "~" H 4100 1700 50  0001 C CNN
 	0    1    1    0   
 $EndComp
 $Comp
-L Connector:AudioJack3_JY039-5P J1
+L monitor-rescue:AudioJack3_JY039-5P-Connector J1
 U 1 1 5BACE1C6
 P 3200 2200
 F 0 "J1" H 2900 2300 50  0000 C CNN

@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:cmon-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -15,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L Connector:AVR-ISP-6 J6
+L monitor-rescue:AVR-ISP-6-Connector J6
 U 1 1 5BAF2B3A
 P 8200 1900
 F 0 "J6" H 7920 1996 50  0000 R CNN
@@ -30,7 +29,7 @@ F 7 "251-8137" H 8200 1900 50  0001 C CNN "SKU1"
 	1    0    0    -1  
 $EndComp
 $Comp
-L MCU_Microchip_ATmega:ATmega328P-AU U3
+L monitor-rescue:ATmega328P-AU-MCU_Microchip_ATmega U3
 U 1 1 5BB1A607
 P 3600 3800
 F 0 "U3" H 3900 5400 50  0000 C CNN

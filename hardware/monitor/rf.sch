@@ -1,6 +1,5 @@
 EESchema Schematic File Version 4
-LIBS:cmon-cache
-EELAYER 26 0
+EELAYER 30 0
 EELAYER END
 $Descr A4 11693 8268
 encoding utf-8
@@ -15,7 +14,7 @@ Comment3 ""
 Comment4 ""
 $EndDescr
 $Comp
-L RF_AM_FM:RFM69CW U4
+L monitor-rescue:RFM69CW-RF_AM_FM U4
 U 1 1 5BB14156
 P 5700 3100
 F 0 "U4" H 5900 3700 50  0000 C CNN

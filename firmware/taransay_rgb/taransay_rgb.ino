@@ -2,7 +2,7 @@
 //
 // Sean Leavey <electronics@attackllama.com>
 
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.1.0"
 
 // RFM69CW settings.
 #define RF69_SPI_CS       10
@@ -17,13 +17,14 @@
 // LED strip settings.
 #define LED_DATA_PIN      8
 #define LED_CLOCK_PIN     9
+#define NUM_LEDS          68
 
 #include <avr/pgmspace.h>
 #include <Taransay.h>
-#include <Adafruit_WS2801.h>
+#include <FastLED.h>
 #include <SPI.h>
 
-Adafruit_WS2801 strip = Adafruit_WS2801(68, LED_DATA_PIN, LED_CLOCK_PIN);
+CRGB strip[NUM_LEDS];
 
 const uint8_t PROGMEM gamma8[] = {
     0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,
@@ -200,6 +201,7 @@ static void parse_command(char message[]) {
 
 void setup() {
   hardware_init();
+  FastLED.addLeds<WS2801, LED_DATA_PIN, LED_CLOCK_PIN>(strip, NUM_LEDS);
 
   Serial.print(F("; Taransay RGB v"));
   Serial.println(FIRMWARE_VERSION);
@@ -224,8 +226,9 @@ void setup() {
   // Disable unused pins, buses, etc.
   //hardware_disable();
 
-  strip.begin();
-  strip.show();  // Update LED contents. To start with, they are all set to off.
+  fill_solid(strip, NUM_LEDS, CRGB::Black);
+  FastLED.setBrightness(255);  // Ensure dithering is off to begin with.
+  FastLED.show();
 
   Serial.println();
   print_help();
@@ -330,14 +333,10 @@ void loop() {
   if (update_strip) {
     Serial.println("; updating strip");
 
-    uint8_t red = map(state.red, 0, 255, 0, state.brightness);
-    uint8_t green = map(state.green, 0, 255, 0, state.brightness);
-    uint8_t blue = map(state.blue, 0, 255, 0, state.brightness);
-
     // Apply gamma correction.
-    red = gamma(red);
-    green = gamma(green);
-    blue = gamma(blue);
+    uint8_t red = gamma(state.red);
+    uint8_t green = gamma(state.green);
+    uint8_t blue = gamma(state.blue);
 
     Serial.print("; R: ");
     Serial.print(red);
@@ -345,6 +344,8 @@ void loop() {
     Serial.print(green);
     Serial.print(" B: ");
     Serial.println(blue);
+    Serial.print(" X: ");
+    Serial.println(state.brightness);
 
     if (!state.on) {
       red = 0;
@@ -352,15 +353,16 @@ void loop() {
       blue = 0;
     }
 
-    for (uint8_t i = 0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, red, green, blue);
-    }
-
-    strip.show();
+    fill_solid(strip, NUM_LEDS, CRGB(red, green, blue));
+    FastLED.setBrightness(state.brightness);
 
     update_strip = false;
     report_state = true;
   }
+
+  // Calling this frequently, even if the LEDs haven't changed, allows temporal
+  // dithering to update LED values.
+  FastLED.show();
 }
 
 uint8_t gamma(uint8_t value) {

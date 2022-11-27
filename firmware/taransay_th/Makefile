@@ -1,4 +1,4 @@
-PROJECT = taransay_rgbw
+PROJECT = taransay_th
 SOURCE = $(PROJECT).ino
 HEX = $(SOURCE).hex
 FQBN = arduino:avr:nano

@@ -1,3 +1,12 @@
+/**
+ * Taransay library
+ *
+ * Functions for reading Taransay board sensors.
+ *
+ * Sean Leavey
+ * <electronics@attackllama.com>
+ */
+
 #ifndef taransay_h
 #define taransay_h
 
@@ -11,14 +20,9 @@
 // Flag compatibility with emonTx v3.
 #define emonTxV3
 
-// RFM69CW/RFM12B compatibility mode.
-#ifndef RF69_COMPAT
-  #define RF69_COMPAT         1
-#endif
-
 // Serial data rate.
 #ifndef BAUD_RATE
-  #define BAUD_RATE           38400
+  #define BAUD_RATE           115200
 #endif
 
 // Battery calibration.
@@ -55,8 +59,10 @@
   #define ASYNC_DELAY         750
 #endif
 
+#include <avr/wdt.h>
 #include <Arduino.h>
-#include <JeeLib.h>
+#include <RFM69.h>
+#include <RFM69_ATC.h>
 #include <OneWire.h> // OneWire protocol library.
 #include <DallasTemperature.h> // DS18B20 temperature sensor library.
 #include <Wire.h> // I2C protocol library.
@@ -86,9 +92,22 @@ extern SI7021 si7021;
 extern int si7021_device_id;
 extern int si7021_temperature, si7021_humidity;
 
-void hardware_init(unsigned int, unsigned int);
+extern uint8_t frequency;
+extern uint16_t node_id;
+extern uint8_t network_id;
+extern bool spy;
+
+#ifdef ENABLE_ATC
+extern RFM69_ATC radio;
+#else
+extern RFM69 radio;
+#endif
+
+void hardware_init();
 void hardware_disable(void);
-void led_flash(unsigned int, unsigned int);
+void led_on();
+void led_off();
+void led_flash(uint8_t, uint8_t);
 void battery_init(void);
 void battery_read(void);
 void ct_init(void);
@@ -99,11 +118,7 @@ void ds18b20_on(void);
 void ds18b20_off(void);
 void si7021_init(void);
 void si7021_read(void);
-void rf_setup(unsigned int, unsigned int);
-bool rf_rx_handle(void);
-void rf_send(void);
-void print_frame(int);
-void serial_print_startup(unsigned int, unsigned int);
-void dodelay(unsigned int);
+void print_sensor_status();
+void dodelay(uint16_t);
 
 #endif

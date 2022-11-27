@@ -1,20 +1,26 @@
-// Taransay Base
+// Taransay switch (hacked to use a latching switch).
+//
+// NOTE: it's probably also possible to do this in hardware with the original taransay_switch.ino
+// firmware by swapping R4/R5 and C2/C3 (making a differentiator).
 //
 // Sean Leavey <electronics@attackllama.com>
 
-#define FIRMWARE_VERSION  "2.0.0"
+#define FIRMWARE_VERSION "1.0.0"
 
 // RFM69CW settings.
-#define RF69_SPI_CS       10
-#define RF69_IRQ_PIN      2
-#define FREQUENCY         RF69_433MHZ
-#define NODE_ID           1
-#define NETWORK_ID        1
+#define RF69_SPI_CS      10
+#define RF69_IRQ_PIN     2
+#define FREQUENCY        RF69_433MHZ
+#define NODE_ID          23
+#define BASE_ID          1
+#define NETWORK_ID       1
 #define MAX_BUFFER_LENGTH 61            // Limited by RFM69 library.
 //#define ENABLE_ATC                    // Enable auto transmission control.
 
 #include <avr/pgmspace.h>
 #include <Taransay.h>
+#include <Adafruit_WS2801.h>
+#include <SPI.h>
 
 // Command handling.
 static uint16_t rf_dest;
@@ -25,24 +31,32 @@ static uint8_t rf_out_len;
 static bool rf_ack;
 static uint8_t rf_retries = 3;
 
+// State.
+typedef struct {
+  bool switch1 = false;
+  bool switch2 = false;
+} State;
+
+State state;
+bool report_state = false;
+
+// Button state.
+bool button1_state;
+bool button2_state;
+
 #ifdef ENABLE_ATC
   RFM69_ATC radio;
 #else
   RFM69 radio;
 #endif
 
-// Spy mode, allowing all packets on the same network to be sniffed.
-bool spy = false;
-
 static void print_help() {
   Serial.println(
     F(
       "; Available commands:\r\n"
-      ";  TX:<n>:msg  - send msg to node <n>, no ack\r\n"
-      ";  TXA:<n>:msg - send msg to node <n>, with ack\r\n"
-      ";  NACK:<n>    - set number of ACK retries to <n>\r\n"
-      ";  SPY         - toggle spy mode\r\n"
-      ";  HELP        - print this help"
+      ";  STATE:<n>:<state> - set state of switch <n> to <state> ('ON' or 'OFF')\r\n"
+      ";  NACK:<n>          - set number of ACK retries to <n>\r\n"
+      ";  HELP              - print this help"
     )
   );
 }
@@ -77,6 +91,12 @@ static void handle_serial() {
   }
 }
 
+static void handle_rf_payload() {
+  rf_in_buf[rf_in_len] = '\0';
+  parse_command(rf_in_buf);
+  rf_in_len = 0;
+}
+
 static void parse_command(char message[]) {
   char *token;
 
@@ -85,42 +105,52 @@ static void parse_command(char message[]) {
   Serial.print(F("> "));
   Serial.print(token);
 
-  if (strcmp(token, "SPY") == 0) {
-    Serial.println();
-    spy = !spy;
-    Serial.print(F("spy mode "));
-    if (spy) {
-      Serial.println(F("on"));
-    } else {
-      Serial.println(F("off"));
-    }
-
-    // Successful parse.
-    return;
-  } else if (strcmp(token, "HELP") == 0) {
+  if (strcmp(token, "HELP") == 0) {
     Serial.println();
     print_help();
 
     // Successful parse.
     return;
-  } else if (strcmp(token, "TX") == 0 || strcmp(token, "TXA") == 0) {
-    // Transmit something to a node.
-    rf_ack = strcmp(token, "TXA") == 0;
+  } else if (strcmp(token, "STATE") == 0) {
+    // Set state.
+    rf_ack = true;
 
-    // The next value is the target node.
     Serial.print(F(" "));
-    token = strtok(null, ":");
+    token = strtok(null, ":");  // switch number
     Serial.print(token);
-    rf_dest = atoi(token);
 
-    // The rest is the payload.
+    uint8_t switch_ = atoi(token);
+
     Serial.print(F(" "));
-    token = strtok(null, "");
-    Serial.println(token);
+    token = strtok(null, ":");  // switch state
+    Serial.print(token);
 
-    // Copy the payload to the message buffer, avoiding the \0 character.
-    strcpy(rf_out_buf, token);
-    rf_out_len = strlen(rf_out_buf);
+    bool status;
+    if (strcmp(token, "ON") == 0) {
+      status = true;
+    } else if (strcmp(token, "OFF") == 0) {
+      status = false;
+    } else {
+      Serial.println();
+      Serial.print(F("! invalid switch status '"));
+      Serial.print(token);
+      Serial.println(F("'"));
+      return;
+    }
+
+    if (switch_ == 1) {
+      state.switch1 = status;
+    } else if (switch_ == 2) {
+      state.switch2 = status;
+    } else {
+      Serial.println();
+      Serial.print(F("! invalid switch number '"));
+      Serial.print(switch_);
+      Serial.println(F("'"));
+      return;
+    }
+
+    Serial.println();
 
     // Successful parse.
     return;
@@ -150,7 +180,7 @@ static void parse_command(char message[]) {
 void setup() {
   hardware_init();
 
-  Serial.print(F("; Taransay Base v"));
+  Serial.print(F("; Taransay switch v"));
   Serial.println(FIRMWARE_VERSION);
   Serial.println(F("; Sean Leavey <electronics@attackllama.com>"));
 
@@ -158,7 +188,6 @@ void setup() {
   print_sensor_status();
 
   radio.initialize(FREQUENCY, NODE_ID, NETWORK_ID);
-  radio.spyMode(spy);
 
   Serial.println(F("; RFM69CW enabled: "));
   Serial.print(F(";   frequency: "));
@@ -172,7 +201,21 @@ void setup() {
 #endif
 
   // Disable unused pins, buses, etc.
-  hardware_disable();
+  //hardware_disable();
+
+  // Set up relays.
+  pinMode(3, OUTPUT);
+  pinMode(4, OUTPUT);
+  digitalWrite(3, LOW);
+  digitalWrite(4, LOW);
+
+  // Set external switches to tristate.
+  pinMode(7, INPUT_PULLUP);
+  pinMode(8, INPUT_PULLUP);
+
+  // Set the current button states.
+  button1_state = digitalRead(7);
+  button2_state = digitalRead(8);
 
   Serial.println();
   print_help();
@@ -181,6 +224,46 @@ void setup() {
 void loop() {
   if (Serial.available()) {
     handle_serial();
+  }
+
+  if (report_state && radio.canSend()) {
+    rf_dest = BASE_ID;
+    rf_out_buf[0] = '\0';
+    strcat(rf_out_buf, "STATE:1:");
+    if (state.switch1) {
+      strcat(rf_out_buf, "ON");
+    } else {
+      strcat(rf_out_buf, "OFF");
+    }
+    strcat(rf_out_buf, ":2:");
+    if (state.switch1) {
+      strcat(rf_out_buf, "ON");
+    } else {
+      strcat(rf_out_buf, "OFF");
+    }
+    rf_out_len = strlen(rf_out_buf);
+
+    Serial.print(F("send ["));
+    Serial.print(rf_dest);
+    Serial.print(F("] "));
+
+    for (uint8_t i = 0; i < rf_out_len; i++) {
+      Serial.print(rf_out_buf[i]);
+    }
+
+    if (rf_ack) {
+      if (radio.sendWithRetry(rf_dest, rf_out_buf, rf_out_len, rf_retries)) {
+        Serial.print(F(" [ACK success]"));
+      } else {
+        Serial.print(F(" [ACK failure]"));
+      }
+    } else {
+      radio.send(rf_dest, rf_out_buf, rf_out_len);
+    }
+
+    Serial.println();
+    rf_dest = 0;
+    report_state = false;
   }
 
   if (radio.receiveDone()) {
@@ -198,10 +281,6 @@ void loop() {
     Serial.print(F("receive "));
     Serial.print(F("[from "));
     Serial.print(radio.SENDERID);
-    if (spy) {
-      Serial.print(F(" to "));
-      Serial.print(radio.TARGETID);
-    }
     Serial.print(F("] "));
 
     for (uint8_t i = 0; i < rf_in_len; i++) {
@@ -223,28 +302,30 @@ void loop() {
     }
 
     Serial.println();
+    handle_rf_payload();
   }
 
-  if (rf_dest && radio.canSend()) {
-    Serial.print(F("send ["));
-    Serial.print(rf_dest);
-    Serial.print(F("] "));
+  bool button1 = digitalRead(7);
+  if (button1_state != button1) {
+    // Fired button 1.
+    state.switch1 = !state.switch1;
+    button1_state = button1;
+  }
 
-    for (uint8_t i = 0; i < rf_out_len; i++) {
-      Serial.print(rf_out_buf[i]);
-    }
+  bool button2 = digitalRead(8);
+  if (button2_state != button2) {
+    // Fired button 2.
+    state.switch2 = !state.switch2;
+    button2_state = button2;
+  }
 
-    if (rf_ack) {
-      if (radio.sendWithRetry(rf_dest, rf_out_buf, rf_out_len, rf_retries)) {
-        Serial.print(F(" [ACK success]"));
-      } else {
-        Serial.print(F(" [ACK failure]"));
-      }
-    } else {
-      radio.send(rf_dest, rf_out_buf, rf_out_len);
-    }
-
-    Serial.println();
-    rf_dest = 0;
+  // Update state.
+  if (digitalRead(3) != state.switch1) {
+    digitalWrite(3, state.switch1);
+    report_state = true;
+  }
+  if (digitalRead(4) != state.switch2) {
+    digitalWrite(4, state.switch2);
+    report_state = true;
   }
 }

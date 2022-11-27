@@ -5,22 +5,22 @@
 //
 // Sean Leavey <electronics@attackllama.com>
 
-#define FIRMWARE_VERSION "1.0.0"
+#define FIRMWARE_VERSION "1.1.0"
 
 // RFM69CW settings.
-#define RF69_SPI_CS       10
-#define RF69_IRQ_PIN      2
-#define FREQUENCY         RF69_433MHZ
-#define NODE_ID           6
-#define BASE_ID           1
-#define NETWORK_ID        1
-#define MAX_BUFFER_LENGTH 61            // Limited by RFM69 library.
-//#define ENABLE_ATC                    // Enable auto transmission control.
+#define RF69_SPI_CS         10
+#define RF69_IRQ_PIN        2
+#define FREQUENCY           RF69_433MHZ
+#define NODE_ID             6
+#define BASE_ID             1
+#define NETWORK_ID          1
+#define MAX_BUFFER_LENGTH   61                   // Limited by RFM69 library.
+//#define ENABLE_ATC                             // Enable auto transmission control.
 
 // LED strip settings.
-#define LED_PIN        6
-#define LED_COUNT      160
-#define BRIGHTNESS     255
+#define LED_PIN             6
+#define LED_COUNT           160
+#define BRIGHTNESS          255
 #define FOOTSWITCH_PIN A7
 
 #include <avr/pgmspace.h>
@@ -59,7 +59,7 @@ static uint8_t rf_retries = 3;
 
 // State.
 typedef struct {
-  bool on = true;
+  bool on = false;
   uint8_t red = 0;
   uint8_t green = 0;
   uint8_t blue = 0;
@@ -173,10 +173,14 @@ static void parse_command(char message[]) {
       token = strtok(null, ",");  // W
       Serial.print(token);
       state.white = atoi(token);
+
+      update_strip = true;
     }
 
     Serial.println();
-    update_strip = true;
+
+    // Report the received state.
+    report_state = true;
 
     // Successful parse.
     return;
@@ -236,6 +240,8 @@ void setup() {
   strip.show();  // Update LED contents. To start with, they are all set to off.
   strip.setBrightness(BRIGHTNESS);
 
+  report_state = true;
+
   Serial.println();
   print_help();
 }
@@ -251,27 +257,28 @@ void loop() {
     static char bstr[4];
     static char wstr[4];
 
-    itoa(state.red, rstr, 10);
-    itoa(state.green, gstr, 10);
-    itoa(state.blue, bstr, 10);
-    itoa(state.white, wstr, 10);
-
     rf_dest = BASE_ID;
     rf_out_buf[0] = '\0';
     strcat(rf_out_buf, "STATE:");
     if (state.on) {
       strcat(rf_out_buf, "ON");
+
+      itoa(state.red, rstr, 10);
+      itoa(state.green, gstr, 10);
+      itoa(state.blue, bstr, 10);
+      itoa(state.white, wstr, 10);
+
+      strcat(rf_out_buf, ":RGBW:");
+      strcat(rf_out_buf, rstr);
+      strcat(rf_out_buf, ",");
+      strcat(rf_out_buf, gstr);
+      strcat(rf_out_buf, ",");
+      strcat(rf_out_buf, bstr);
+      strcat(rf_out_buf, ",");
+      strcat(rf_out_buf, wstr);
     } else {
       strcat(rf_out_buf, "OFF");
     }
-    strcat(rf_out_buf, ":RGBW:");
-    strcat(rf_out_buf, rstr);
-    strcat(rf_out_buf, ",");
-    strcat(rf_out_buf, gstr);
-    strcat(rf_out_buf, ",");
-    strcat(rf_out_buf, bstr);
-    strcat(rf_out_buf, ",");
-    strcat(rf_out_buf, wstr);
     rf_out_len = strlen(rf_out_buf);
 
     Serial.print(F("send ["));
@@ -339,15 +346,13 @@ void loop() {
   bool button = analogRead(FOOTSWITCH_PIN) > 800;  // For some reason digitalRead doesn't detect LOW properly.
   if (button_triggered && button) {
     // Fired button transitioned back to HIGH.
-    if (state.on) {
-      state.on = false;
-    } else {
-      // Reset to default on state.
-      state = State();
-    }
+    bool was_on = state.on;
+    state = State();
+    state.on = !was_on;
+    update_strip = true;
+    report_state = true;
 
     button_triggered = false;
-    update_strip = true;
   } else {
     if (!button) {
       // Initial firing. Button is LOW.
@@ -356,41 +361,36 @@ void loop() {
   }
 
   if (update_strip) {
-    Serial.println("; updating strip");
-
-    // Apply gamma correction.
-    uint8_t red = gamma(state.red);
-    uint8_t green = gamma(state.green);
-    uint8_t blue = gamma(state.blue);
-    uint8_t white = gamma(state.white);
-
-    Serial.print("; R: ");
-    Serial.print(red);
-    Serial.print(" G: ");
-    Serial.print(green);
-    Serial.print(" B: ");
-    Serial.println(blue);
-    Serial.print(" W: ");
-    Serial.println(white);
-
-    if (!state.on) {
-      red = 0;
-      green = 0;
-      blue = 0;
-      white = 0;
-    }
-
-    for (uint8_t i = 0; i < strip.numPixels(); i++) {
-      strip.setPixelColor(i, red, green, blue, white);
-    }
-
+    update_rgb();
     strip.show();
-
     update_strip = false;
-    report_state = true;
   }
 }
 
 uint8_t gamma(uint8_t value) {
   return pgm_read_byte(&gamma8[value]);
+}
+
+void update_rgb() {
+  uint8_t red;
+  uint8_t green;
+  uint8_t blue;
+  uint8_t white;
+
+  if (state.on) {
+    // Apply gamma correction.
+    red = gamma(state.red);
+    green = gamma(state.green);
+    blue = gamma(state.blue);
+    white = gamma(state.white);
+  } else {
+    red = 0;
+    green = 0;
+    blue = 0;
+    white = 0;
+  }
+
+  for (uint8_t i = 0; i < strip.numPixels(); i++) {
+    strip.setPixelColor(i, red, green, blue, white);
+  }
 }

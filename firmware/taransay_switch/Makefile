@@ -1,4 +1,4 @@
-PROJECT = taransay_rgbw
+PROJECT = taransay_switch
 SOURCE = $(PROJECT).ino
 HEX = $(SOURCE).hex
 FQBN = arduino:avr:nano
@@ -15,4 +15,4 @@ clean:
 	rm $(SOURCE).*
 
 $(HEX): $(SOURCE)
-	arduino-cli compile --fqbn $(FQBN) --output-dir $(CURDIR) $(SOURCE)
+	arduino-cli compile --fqbn $(FQBN) --output-dir $(CURDIR) $(PROJECT)

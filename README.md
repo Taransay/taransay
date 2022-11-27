@@ -1,15 +1,19 @@
-Taransay Energy Monitor
-=======================
+# Taransay home monitoring hardware and firmware
+This is a series of wireless (433 MHz) electricity, gas, temperature and humidity monitors, electricity switches
+and RGB(W) controllers and base station, with interoperability with [Home Assistant](https://www.home-assistant.io/). It uses low cost RF modules from HopeRF for intercommunication, avoiding the security
+implications of having several seldomly-updated WiFi modules on your home network. The range is also
+far greater.
 
-This is an electricity, gas, temperature and humidity monitor and base station. It's
-a remix of the [emonTx](https://github.com/openenergymonitor/emontx3) and
-[emonTH](https://github.com/openenergymonitor/emonth2) from
-[OpenEnergyMonitor](http://openenergymonitor.com/). The intention is to use the
-firmware from these projects with minimal changes, and the
-[emoncms](https://github.com/emoncms) data logging infrastructure as-is.
+The hardware and firmware designs are loosely based on those of the [emonTx](https://github.com/openenergymonitor/emontx3), [emonTH](https://github.com/openenergymonitor/emonth2) (both [OpenEnergyMonitor](http://openenergymonitor.com/)) and [Moteino](https://lowpowerlab.com/guide/moteino/) (LowPowerLab).
 
-As of writing, the hardware is being tested. This readme will be expanded once the
-bugs have been ironed out.
+The firmware is designed to talk to Home Assistant via the Taransay base station, which is a small
+transceiver that plugs into a Raspberry Pi or similar and talks to an instance of [Taransay
+Data Forwarder](https://github.com/Taransay/taransayhub) over serial. This way, you just need to
+keep your Raspberry Pi updated and not several distributed devices.
 
-Sean Leavey  
-https://github.com/SeanDS  
+## Status
+The hardware and firmware all works, though there are few instructions for getting it all to work,
+so if you happen to want to use any of this it's best to get in touch.
+
+## Credits
+Sean Leavey <https://github.com/SeanDS>

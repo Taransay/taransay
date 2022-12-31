@@ -1,11 +1,4 @@
-// Firmware version.
-#define FIRMWARE_VERSION "1.1.0"
-
-// Watchdog timeout (ms).
-#define WDT_PERIOD            80
-// Data sent after WDT_MAX_NUMBER periods of WDT_PERIOD ms without pulses:
-// 60 x 80 ms = 4.8 s (~5 s once processed by emoncms).
-#define WDT_MAX_NUMBER        60
+#define FIRMWARE_VERSION "1.2.0"
 
 // Set DS18B20 temperature precision. The higher the precision, the longer, and therefore
 // more battery power, the conversion takes.
@@ -15,115 +8,200 @@
 #define ASYNC_DELAY           375
 
 // RFM69CW settings.
-#define NETWORK_NODE_ID       21  // 0-31
-#define NETWORK_GROUP         210
+#define RF69_SPI_CS         10
+#define RF69_IRQ_PIN        2
+#define FREQUENCY           RF69_433MHZ
+#define NODE_ID             10
+#define BASE_ID             1
+#define NETWORK_ID          1
+#define MAX_BUFFER_LENGTH   61                   // Limited by RFM69 library.
+#define ENABLE_ATC                               // Enable auto transmission control.
 
 #include <avr/power.h>
 #include <avr/pgmspace.h>
+#include <LowPower.h>
 #include <Taransay.h>
 #include <EmonLib.h>
 
-// Attach JeeLib sleep function to Atmega328 watchdog.
-// This enables the microcontroller to be put into sleep mode in between readings to reduce power consumption.
-ISR(WDT_vect) { Sleepy::watchdogEvent(); }
-
-// Packet structure.
-typedef struct {
-  int supply_voltage;               // x1000
-  int power;                        // x1
-  int temperature;                  // x10
-  int humidity;                     // x10
-  int ext_temperature;              // x10
-} PayloadTX;
-
-PayloadTX taransay_ct;
+// Watchdog timeout.
+#define WDT_PERIOD            SLEEP_8S
+// State updated after WDT_MAX_NUMBER periods of WDT_PERIOD.
+#define WDT_MAX_NUMBER        4  // approx. 30 seconds
 
 // Watchdog timer count.
-unsigned long WDT_number;
+uint16_t WDT_number = 0;
+
+// Command handling.
+static uint16_t rf_dest;
+static char rf_out_buf[MAX_BUFFER_LENGTH];
+static uint8_t rf_out_len;
+static bool rf_ack = true;
+static uint8_t rf_retries = 3;
+
+// State structure.
+typedef struct {
+  int16_t supply_voltage;               // x1000
+  int16_t power;                        // x1
+  int16_t temperature;                  // x10
+  int16_t ext_temperature;              // x10
+  int16_t humidity;                     // x10
+} State;
+
+State state;
+bool report_state;
+
+#ifdef ENABLE_ATC
+  RFM69_ATC radio;
+#else
+  RFM69 radio;
+#endif
 
 void setup() {
-  delay(100);
+  hardware_init();
 
-  hardware_init(NETWORK_NODE_ID, NETWORK_GROUP);
-  
-  Serial.print(F("; Taransay CT v")); Serial.println(FIRMWARE_VERSION);
+  Serial.print(F("; Taransay CT v"));
+  Serial.println(FIRMWARE_VERSION);
   Serial.println(F("; Sean Leavey <electronics@attackllama.com>"));
-  Serial.println(F("; Starting..."));
 
-  delay(2000);
-  serial_print_startup(NETWORK_NODE_ID, NETWORK_GROUP);
+  delay(500);
+  print_sensor_status();
 
-  // Initial watchdog count.
-  WDT_number = 720;
+  radio.initialize(FREQUENCY, NODE_ID, NETWORK_ID);
+
+  Serial.println(F("; RFM69CW enabled: "));
+  Serial.print(F(";   frequency: "));
+  Serial.println(FREQUENCY == RF69_433MHZ ? "433" : FREQUENCY == RF69_868MHZ ? "868" : "915");
+  Serial.print(F(";   node: "));
+  Serial.println(NODE_ID);
+  Serial.print(F(";   network: "));
+  Serial.println(NETWORK_ID);
+#ifdef ENABLE_ATC
+  Serial.println(F(";   auto transmission control enabled"));
+#endif
 
   // Disable unused pins, buses, etc.
   hardware_disable();
-  //if (debug==0) power_usart0_disable();   //disable serial UART
+
+  // Let sensors settle then make a measurement.
+  delay(2000);
+  report_state = true;
 }
 
-void loop()
-{
-  if (Sleepy::loseSomeTime(WDT_PERIOD)) {
-    WDT_number++;
+void loop() {
+  if (report_state) {
+    static char vstr[6];
+    static char pstr[6];
+    static char t1str[6];
+    static char t2str[6];
+    static char hstr[6];
+
+    // Get supply voltage.
+    if (battery_enabled) {
+      battery_read();
+    } else {
+      battery_voltage = 0;
+    }
+
+    state.supply_voltage = battery_voltage;
+
+    // Read power.
+    if (ct_enabled) {
+      ct_read();
+    } else {
+      // Set power to zero.
+      ct_power = 0;
+    }
+    
+    state.power = ct_power;
+
+    // Read from SI7021 temperature and humidity sensor.
+    if (si7021_enabled) {
+      si7021_read();
+      state.temperature = si7021_temperature;
+      state.humidity = si7021_humidity;
+    }
+
+    // Get external temperature reading.
+    if (ds18b20_enabled) {
+      ds18b20_read();
+    }
+
+    // Copy temperature into payload.
+    state.ext_temperature = ds18b20_temperature;
+
+    ////////////////
+    // Send data. //
+    ////////////////
+
+    rf_dest = BASE_ID;
+    rf_out_buf[0] = '\0';
+
+    strcat(rf_out_buf, "STATE:");
+
+    itoa(state.supply_voltage, vstr, 10);
+    itoa(state.power, pstr, 10);
+    itoa(state.temperature, t1str, 10);
+    itoa(state.ext_temperature, t2str, 10);
+    itoa(state.humidity, hstr, 10);
+
+    strcat(rf_out_buf, "V:");
+    strcat(rf_out_buf, vstr);
+    strcat(rf_out_buf, ":P:");
+    strcat(rf_out_buf, pstr);
+    strcat(rf_out_buf, ":T1:");
+    strcat(rf_out_buf, t1str);
+    strcat(rf_out_buf, ":T2:");
+    strcat(rf_out_buf, t2str);
+    strcat(rf_out_buf, ":H:");
+    strcat(rf_out_buf, hstr);
+
+    rf_out_len = strlen(rf_out_buf);
+
+    Serial.print(F("send ["));
+    Serial.print(rf_dest);
+    Serial.print(F("] "));
+
+    for (uint8_t i = 0; i < rf_out_len; i++) {
+      Serial.print(rf_out_buf[i]);
+    }
+
+    if (rf_ack) {
+      if (radio.sendWithRetry(rf_dest, rf_out_buf, rf_out_len, rf_retries)) {
+        Serial.print(F(" [ACK success]"));
+      } else {
+        Serial.print(F(" [ACK failure]"));
+      }
+    } else {
+      radio.send(rf_dest, rf_out_buf, rf_out_len);
+    }
+
+    Serial.println();
+    rf_dest = 0;
+    report_state = false;
+
+    delay(100);  // Allow message to send before sleeping.
+    radio.sleep();
   }
+
+  LowPower.idle(
+    WDT_PERIOD,
+    ADC_OFF,
+    TIMER2_OFF,
+    TIMER1_OFF,
+    TIMER0_OFF,
+    SPI_OFF,
+    USART0_OFF,
+    TWI_OFF
+  );
+
+  WDT_number++;
 
   if (WDT_number < WDT_MAX_NUMBER) {
     return;
   }
-  
-  // Get supply voltage (x1000).
-  if (battery_enabled) {
-    battery_read();
-  } else {
-    battery_voltage = 0;
-  }
-  
-  taransay_ct.supply_voltage = battery_voltage;
-
-  // Read power.
-  if (ct_enabled) {
-    ct_read();
-  } else {
-    // Set power to zero.
-    ct_power = 0;
-  }
-  
-  taransay_ct.power = ct_power;
-
-  // Read from SI7021 temperature and humidity sensor.
-  if (si7021_enabled) {
-    si7021_read();
-    taransay_ct.temperature = int(si7021_temperature * 0.1);
-    taransay_ct.humidity = int(si7021_humidity * 0.1);
-  }
-
-  // Get external temperature reading.
-  if (ds18b20_enabled) {
-    ds18b20_read();
-  }
-  
-  // Copy temperature into payload.
-  taransay_ct.ext_temperature = ds18b20_temperature;
-
-  // Enable SPI bus for RF module.
-  power_spi_enable();
-
-  // Sleep until fully woken up.
-  rf12_sleep(RF12_WAKEUP);
-  dodelay(30);
-
-  // Send payload.
-  rf12_sendNow(0, &taransay_ct, sizeof taransay_ct);
-
-  // Set the sync mode to 3 (full power down) then sleep.
-  // NOTE: this requires the 258 CK fuse to be set.
-  rf12_sendWait(3);
-  rf12_sleep(RF12_SLEEP);
-  dodelay(100);
-
-  // Disable SPI bus.
-  power_spi_disable();
 
   // Reset watchdog count.
   WDT_number = 0;
+
+  report_state = true;
 }

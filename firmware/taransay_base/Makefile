@@ -15,4 +15,4 @@ clean:
 	rm $(SOURCE).*
 
 $(HEX): $(SOURCE)
-	arduino-cli compile --fqbn $(FQBN) --output-dir $(CURDIR) $(PROJECT)
+	arduino-cli compile --fqbn $(FQBN) --output-dir $(CURDIR) $(SOURCE)

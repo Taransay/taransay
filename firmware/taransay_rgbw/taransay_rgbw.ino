@@ -173,13 +173,11 @@ static void parse_command(char message[]) {
       token = strtok(null, ",");  // W
       Serial.print(token);
       state.white = atoi(token);
-
-      update_strip = true;
     }
 
     Serial.println();
 
-    // Report the received state.
+    update_strip = true;
     report_state = true;
 
     // Successful parse.

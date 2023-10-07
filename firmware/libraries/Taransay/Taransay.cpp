@@ -29,11 +29,16 @@ void hardware_init() {
   pinMode(LED_PIN, OUTPUT);
   led_on();
 
+#ifdef DEBUG
   // Set up serial.
   Serial.begin(BAUD_RATE);
+#endif
+
   _delay_ms(100);
 
+#ifdef DEBUG
   Serial.print(F("; Starting..."));
+#endif
 
   // Set up battery monitor.
   battery_init();
@@ -51,7 +56,9 @@ void hardware_init() {
   si7021_init();
   _delay_ms(100);
 
+#ifdef DEBUG
   Serial.println(F(" done"));
+#endif
 
   // Switch off LED.
   led_off();
@@ -74,7 +81,7 @@ void hardware_disable() {
 
   // Disable analog comparator.
   ACSR |= (1 << ACD);
-  // Disable I2C bus power.
+  // Disable I2C bus power (until needed).
   power_twi_disable();
   // Disable second timer.
   power_timer1_disable();
@@ -167,7 +174,16 @@ void ds18b20_read() {
   sensors.requestTemperatures();
 
   // Wait for temperature measurement.
-  dodelay(ASYNC_DELAY);
+  LowPower.idle(
+    ASYNC_DELAY,
+    ADC_OFF,
+    TIMER2_OFF,
+    TIMER1_OFF,
+    TIMER0_OFF,
+    SPI_OFF,
+    USART0_OFF,
+    TWI_OFF
+  );
 
   // Get temperature.
   float temperature = sensors.getTempC(ds18b20_address);
@@ -238,6 +254,7 @@ void si7021_read() {
 }
 
 void print_sensor_status() {
+#ifdef DEBUG
   Serial.println(F("; Device status:"));
 
   if (battery_enabled) {
@@ -289,6 +306,7 @@ void print_sensor_status() {
     Serial.print(si7021_device_id);
     Serial.println(F(")"));
   }
+#endif
 }
 
 void dodelay(uint16_t period) {

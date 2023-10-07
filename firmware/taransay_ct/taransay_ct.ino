@@ -1,5 +1,10 @@
 #define FIRMWARE_VERSION "1.2.0"
 
+extern const int VOLTAGE_RMS = 230;
+extern const int VOLTAGE_SAMPLES = 1662;
+// Current calibration: (2000 turns / 22 ohm burden resistance).
+extern const int CURRENT_CALIBRATION = 90.9;
+
 // Set DS18B20 temperature precision. The higher the precision, the longer, and therefore
 // more battery power, the conversion takes.
 // 9 (93.8ms), 10 (187.5ms), 11 (375ms) or 12 (750ms) bits
@@ -26,7 +31,7 @@
 // Watchdog timeout.
 #define WDT_PERIOD            SLEEP_8S
 // State updated after WDT_MAX_NUMBER periods of WDT_PERIOD.
-#define WDT_MAX_NUMBER        4  // approx. 30 seconds
+#define WDT_MAX_NUMBER        2  // approx. 16 seconds
 
 // Watchdog timer count.
 uint16_t WDT_number = 0;
@@ -111,7 +116,7 @@ void loop() {
       // Set power to zero.
       ct_power = 0;
     }
-    
+
     state.power = ct_power;
 
     // Read from SI7021 temperature and humidity sensor.

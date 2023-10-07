@@ -21,43 +21,29 @@
 #define emonTxV3
 
 // Serial data rate.
-#ifndef BAUD_RATE
-  #define BAUD_RATE           115200
-#endif
+extern const int BAUD_RATE;
 
 // Battery calibration.
-#ifndef BATTERY_CALIBRATION
-  #define BATTERY_CALIBRATION 2.0
-#endif
+extern const int BATTERY_CALIBRATION;
 
 // Voltage used for apparent power measurement.
-#ifndef VOLTAGE_RMS
-  #define VOLTAGE_RMS         230
-#endif
+extern const int VOLTAGE_RMS;
 
 // Number of samples to make.
-#ifndef VOLTAGE_SAMPLES
-  #define VOLTAGE_SAMPLES     1662
-#endif
+extern const int VOLTAGE_SAMPLES;
 
-// Current calibration: (2000 turns / 22 ohm burden resistance).
-#ifndef CURRENT_CALIBRATION
-  #define CURRENT_CALIBRATION 90.9
-#endif
+// Current calibration.
+extern const int CURRENT_CALIBRATION;
 
 // DS18B20 temperature precision: 9 (93.8ms), 10 (187.5ms), 11 (375ms) or 12 (750ms) bits
 // equal to resolution of 0.5 C, 0.25 C, 0.125 C and 0.0625 C.
-#ifndef DS18B20_PRECISION
-  #define DS18B20_PRECISION   12
-#endif
+extern const int DS18B20_PRECISION;
+
+// Delay required to take temperature measurement (see above).
+extern const int ASYNC_DELAY;
 
 // Default temperature reading for when reading is out of range of sensor is not present.
 #define DS18B20_DEFAULT       -55
-
-// Delay required to take temperature measurement (see above).
-#ifndef ASYNC_DELAY
-  #define ASYNC_DELAY         750
-#endif
 
 #include <avr/wdt.h>
 #include <Arduino.h>
@@ -68,6 +54,7 @@
 #include <Wire.h> // I2C protocol library.
 #include <SI7021.h> // Si7021 temperature and humidity sensor library.
 #include <EmonLib.h>
+#include <LowPower.h>
 
 // Detected hardware flags.
 extern bool battery_enabled;

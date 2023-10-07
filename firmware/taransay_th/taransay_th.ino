@@ -1,11 +1,19 @@
-#define FIRMWARE_VERSION "1.1.0"
+#define FIRMWARE_VERSION "1.1.1"
 
+extern const int BAUD_RATE = 115200;
+extern const int BATTERY_CALIBRATION = 2;
 // Set DS18B20 temperature precision. The higher the precision, the longer, and therefore
 // more battery power, the conversion takes.
 // 9 (93.8ms), 10 (187.5ms), 11 (375ms) or 12 (750ms) bits
 // equal to resolution of 0.5 C, 0.25 C, 0.125 C and 0.0625 C.
-#define DS18B20_PRECISION     11
-#define ASYNC_DELAY           375
+extern const int DS18B20_PRECISION = 11;
+
+#include <LowPower.h>
+
+extern const int ASYNC_DELAY = SLEEP_500MS;
+extern const int VOLTAGE_RMS = 230;
+extern const int VOLTAGE_SAMPLES = 1662;
+extern const int CURRENT_CALIBRATION = 90.9;
 
 // RFM69CW settings.
 #define RF69_SPI_CS         10
@@ -19,7 +27,6 @@
 
 #include <avr/power.h>
 #include <avr/pgmspace.h>
-#include <LowPower.h>
 #include <Taransay.h>
 #include <EmonLib.h>
 
@@ -58,15 +65,18 @@ bool report_state;
 void setup() {
   hardware_init();
 
+#ifdef DEBUG
   Serial.print(F("; Taransay TH v"));
   Serial.println(FIRMWARE_VERSION);
   Serial.println(F("; Sean Leavey <electronics@attackllama.com>"));
+#endif
 
   delay(500);
   print_sensor_status();
 
   radio.initialize(FREQUENCY, NODE_ID, NETWORK_ID);
 
+#ifdef DEBUG
   Serial.println(F("; RFM69CW enabled: "));
   Serial.print(F(";   frequency: "));
   Serial.println(FREQUENCY == RF69_433MHZ ? "433" : FREQUENCY == RF69_868MHZ ? "868" : "915");
@@ -76,6 +86,7 @@ void setup() {
   Serial.println(NETWORK_ID);
 #ifdef ENABLE_ATC
   Serial.println(F(";   auto transmission control enabled"));
+#endif
 #endif
 
   // Disable unused pins, buses, etc.
@@ -142,6 +153,7 @@ void loop() {
 
     rf_out_len = strlen(rf_out_buf);
 
+#ifdef DEBUG
     Serial.print(F("send ["));
     Serial.print(rf_dest);
     Serial.print(F("] "));
@@ -149,18 +161,25 @@ void loop() {
     for (uint8_t i = 0; i < rf_out_len; i++) {
       Serial.print(rf_out_buf[i]);
     }
+#endif
 
     if (rf_ack) {
-      if (radio.sendWithRetry(rf_dest, rf_out_buf, rf_out_len, rf_retries)) {
+      bool sent = radio.sendWithRetry(rf_dest, rf_out_buf, rf_out_len, rf_retries);
+
+#ifdef DEBUG
+      if (sent) {
         Serial.print(F(" [ACK success]"));
       } else {
         Serial.print(F(" [ACK failure]"));
       }
+#endif
     } else {
       radio.send(rf_dest, rf_out_buf, rf_out_len);
     }
 
+#ifdef DEBUG
     Serial.println();
+#endif
     rf_dest = 0;
     report_state = false;
 
